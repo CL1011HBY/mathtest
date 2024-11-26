@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Algebra and Ratio Test</title>
+    <script>
+        // Variables to track the state
+        let level = 1;
+        let score = 0;
+        let totalQuestions = 0;
+
+        // Random integer generator
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Question generators
+        function generateFactorizingQuestion(level) {
+            if (level === 1) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                return [`Factorize:${a * b}x+${a}y`, `${a}(${b}x+y)`];
+            } else if (level === 2) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                let c = randomInt(1, 5);
+                return [`Factorize:${a * c}x^2+${a * b}x`, `${a}x(${c}x+${b})`];
+            } else {
+                let a = randomInt(1, 5);
+                let b = randomInt(1, 5);
+                let c = randomInt(1, 5);
+                let d = randomInt(1, 5);
+                return [`Factorize:${a * c}x^2+${a * d}x+${b * c}x+${b * d}`, `(${a}x+${b})(${c}x+${d})`];
+            }
+        }
+
+        function generateLikeTermsQuestion(level) {
+            if (level === 1) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                return [`Simplify:${a}x+${b}x`, `${a + b}x`];
+            } else if (level === 2) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                let c = randomInt(1, 10);
+                let d = randomInt(1, 10);
+                return [`Simplify:${a}x+${b}y-${c}x-${d}y`, `${a - c}x+${b - d}y`];
+            } else {
+                let terms = Array.from({ length: 6 }, () => randomInt(1, 10));
+                return [`Simplify:${terms[0]}x^2+${terms[1]}x+${terms[2]}y-${terms[3]}x^2-${terms[4]}y-${terms[5]}x`, 
+                        `${terms[0] - terms[3]}x^2+${terms[1] - terms[5]}x+${terms[2] - terms[4]}y`];
+            }
+        }
+
+        function generateEquationQuestion(level) {
+            if (level === 1) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                return [`Solve:${a}x=${b}`, `x=${(b / a).toFixed(2)}`];
+            } else if (level === 2) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                let c = randomInt(1, 10);
+                return [`Solve:${a}x+${b}=${c}`, `x=${((c - b) / a).toFixed(2)}`];
+            } else {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                let c = randomInt(1, 10);
+                let d = randomInt(1, 10);
+                return [`Solve:${a}x+${b}=${c}x+${d}`, `x=${((d - b) / (a - c)).toFixed(2)}`];
+            }
+        }
+
+        function generateRatioQuestion(level) {
+            if (level === 1) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                let gcd = (x, y) => y === 0 ? x : gcd(y, x % y);
+                let divisor = gcd(a, b);
+                return [`Simplify:${a}:${b}`, `${a / divisor}:${b / divisor}`];
+            } else if (level === 2) {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                let c = randomInt(1, 10);
+                return [`Divide:${c}intheratio${a}:${b}`, `${((a * c) / (a + b)).toFixed(2)}and${((b * c) / (a + b)).toFixed(2)}`];
+            } else {
+                let a = randomInt(1, 10);
+                let b = randomInt(1, 10);
+                let c = randomInt(1, 10);
+                return [`Ratio:${a}to${b}isequivalentto${c}towhatnumber`, `${(b * c / a).toFixed(2)}`];
+            }
+        }
+
+        // Select random question
+        function getQuestion() {
+            const topics = [generateFactorizingQuestion, generateLikeTermsQuestion, generateEquationQuestion, generateRatioQuestion];
+            const topic = topics[randomInt(0, topics.length - 1)];
+            return topic(level);
+        }
+
+        // Update UI and handle responses
+        function askQuestion() {
+            if (totalQuestions >= 10) {
+                document.getElementById("question").textContent = `Test complete! Final Score: ${score}/10.`;
+                document.getElementById("input").style.display = "none";
+                return;
+            }
+
+            const [question, answer] = getQuestion();
+            document.getElementById("question").textContent = question;
+            document.getElementById("input").dataset.answer = answer;
+            totalQuestions++;
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById("answer").value.trim();
+            const correctAnswer = document.getElementById("input").dataset.answer;
+
+            if (userAnswer === correctAnswer) {
+                score++;
+                if (score % 3 === 0) level = Math.min(level + 1, 3);
+                alert("Correct!");
+            } else {
+                level = Math.max(level - 1, 1);
+                alert(`Wrong! Correct answer was: ${correctAnswer}`);
+            }
+
+            document.getElementById("answer").value = "";
+            askQuestion();
+        }
+    </script>
+</head>
+<body onload="askQuestion()">
+    <h1>Adaptive Algebra and Ratio Test</h1>
+    <p id="question">Loading question...</p>
+    <div id="input">
+        <input type="text" id="answer" placeholder="Enter your answer" />
+        <button onclick="checkAnswer()">Submit</button>
+    </div>
+</body>
+</html>
